@@ -22,7 +22,7 @@ for file in "${files[@]}"; do
 done
 echo "::endgroup::"
 
-lenPar1=${#basedir} + 1
+lenPar1=$(( ${#basedir} + 1 ))
 
 declare -A freqs
 
