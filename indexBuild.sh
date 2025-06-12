@@ -13,8 +13,7 @@ done < "$1/files.lst"
 echo "::endgroup::"
 
 echo "::group::Directory $1 file index"
-shopt -s globstar nullglob
-files=("$1"**/*.{htm,html,md})
+mapfile -d '' files < <(find "$1" -type f \( -name "*.htm" -o -name "*.html" -o -name "*.md" \) -print0)
 
 echo "Files found:"
 for file in "${files[@]}"; do
