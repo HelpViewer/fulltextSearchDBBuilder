@@ -5,15 +5,16 @@ date
 echo "::group::Current user defined file list"
 declare -A fileList
 i_fileList=0
+basedir=$1
 while IFS='|' read -r left _; do
   fileList["$left"]="$i_fileList"
   echo "$left => [$i_fileList]"
   ((i_fileList++))
-done < "$1/files.lst"
+done < "$basedir/files.lst"
 echo "::endgroup::"
 
-echo "::group::Directory $1 file index"
-mapfile -d '' files < <(find "$1" -type f \( -name "*.htm" -o -name "*.html" -o -name "*.md" \) -print0)
+echo "::group::Directory $basedir file index"
+mapfile -d '' files < <(find "$basedir" -type f \( -name "*.htm" -o -name "*.html" -o -name "*.md" \) -print0)
 
 echo "Files found:"
 for file in "${files[@]}"; do
@@ -21,7 +22,7 @@ for file in "${files[@]}"; do
 done
 echo "::endgroup::"
 
-lenPar1=${#1}
+lenPar1=${#basedir} + 1
 
 declare -A freqs
 
@@ -47,7 +48,7 @@ for filename in "${files[@]}"; do
     fileList["$_fname"]="$i_fileList"
     echo "$_fname => [$i_fileList]"
     ((i_fileList++))
-    echo "$_fname|" >> "$1/files.lst"
+    echo "$_fname|" >> "$basedir/files.lst"
   fi
   
   _fname=${fileList[$_fname]}
@@ -84,8 +85,8 @@ done
 echo "::group::buffers ordering  ..."
 date
 orderedKeys=$(printf '%s\n' "${!freqs[@]}" | sort)
-rm "$1/fts-keywords.lst"
-rm "$1/fts-keywords-files.lst"
+rm "$basedir/fts-keywords.lst"
+rm "$basedir/fts-keywords-files.lst"
 
 i_kwd=0
 for key in $orderedKeys; do
@@ -93,8 +94,8 @@ for key in $orderedKeys; do
   sorted=$(echo "${freqs[$key]}" | tr ' ' '\n' | sort -r | tr '\n' ' ' | sed 's/ $//')
   sorted=$(echo "$sorted" | tr ' ' '\n' | cut -d':' -f2 | paste -sd';' -)
   freqs[$key]="$sorted"
-  echo "$key" >> "$1/fts-keywords.lst"
-  echo "$sorted" >> "$1/fts-keywords-files.lst"
+  echo "$key" >> "$basedir/fts-keywords.lst"
+  echo "$sorted" >> "$basedir/fts-keywords-files.lst"
   ((i_kwd++))
 done
 echo "::endgroup::"
